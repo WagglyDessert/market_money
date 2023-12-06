@@ -6,5 +6,5 @@ class Vendor < ApplicationRecord
   validates :description, presence: true
   validates :contact_name, presence: true
   validates :contact_phone, presence: true
-  validates :credit_accepted, presence: true
+  validates(:credit_accepted, exclusion: { in: [nil] })
 end

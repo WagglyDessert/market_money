@@ -16,10 +16,29 @@ class Api::V0::VendorsController < ApplicationController
 
   def create
     vendor = Vendor.new(vendor_params)
-    if vendor.save
+
+    begin
+      vendor.save!
+      render json: VendorSerializer.new(vendor)
+    rescue ActiveRecord::RecordInvalid => e
+      error_messages = e.record.errors.full_messages.join(', ')
+      render json: { errors: [{ status: "400", detail: "Validation failed: #{error_messages}" }] }, status: :bad_request
+    end
+  end
+
+  def update
+    vendor = Vendor.find(params[:id])
+    # begin
+    #   vendor.update(vendor_params)
+    #   render json: VendorSerializer.new(vendor)
+    # rescue ActiveRecord::RecordInvalid => e
+    #   error_messages = e.record.errors.full_messages.join(', ')
+    #   render json: { errors: [{ status: "400", detail: "Validation failed: #{error_messages}" }] }, status: :bad_request
+    if vendor.update(vendor_params)
       render json: VendorSerializer.new(vendor)
     else
-      rescue_from ActiveRecord::RecordNotFound, with: :not_created_response
+      error_messages = vendor.errors.full_messages.join(', ')
+      render json: { errors: [{ status: "400", detail: "Validation failed: #{error_messages}" }] }, status: :bad_request
     end
   end
 
@@ -28,14 +47,10 @@ class Api::V0::VendorsController < ApplicationController
   def vendor_params
     params.permit(:name, :description, :contact_name, :contact_phone, :credit_accepted)
   end
- 
+
   def not_found_response(exception)
     render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 404))
       .serialize_json, status: :not_found
   end
 
-  def not_created_response(exception)
-    render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 400))
-      .serialize_json, status: :not_found
-  end
 end
