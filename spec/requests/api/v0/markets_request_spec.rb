@@ -83,7 +83,7 @@ RSpec.describe "Market API Tests", type: :request do
 
       expect(error[:errors]).to be_a(Array)
       expect(error[:errors].first[:status]).to eq("404")
-      expect(error[:errors].first[:title]).to eq("Couldn't find Market with 'id'=322458")
+      expect(error[:errors].first[:detail]).to eq("Couldn't find Market with 'id'=322458")
     end
 
   end
