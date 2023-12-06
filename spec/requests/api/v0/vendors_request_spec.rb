@@ -47,11 +47,9 @@ RSpec.describe "Vendor API Tests", type: :request do
       expect(error[:errors].first[:title]).to eq("Couldn't find Market with 'id'=322458")
     end
 
-    it "retrieves information for a single vendor for a market" do
-      market = create(:market)
+    it "retrieves information for a single vendor" do
       vendor_1 = create(:vendor)
-      market_vendor1 = create(:market_vendor, market_id: market.id, vendor_id: vendor_1.id)
-      get "/api/v0/markets/#{market.id}/vendors/#{vendor_1.id}"
+      get "/api/v0/vendors/#{vendor_1.id}"
       expect(response).to be_successful
 
       vendor = JSON.parse(response.body, symbolize_names: true)[:data]
@@ -73,6 +71,18 @@ RSpec.describe "Vendor API Tests", type: :request do
 
       expect(vendor[:attributes]).to have_key(:credit_accepted)
       expect(vendor[:attributes][:credit_accepted]).to be_a(TrueClass).or be_a(FalseClass)
+    end
+
+    it "displays 404 error if it can't find vendor" do
+      get "/api/v0/vendors/1234"
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+
+      error = JSON.parse(response.body, symbolize_names: true)
+
+      expect(error[:errors]).to be_a(Array)
+      expect(error[:errors].first[:status]).to eq("404")
+      expect(error[:errors].first[:title]).to eq("Couldn't find Vendor with 'id'=1234")
     end
   end
 end
