@@ -5,6 +5,8 @@ RSpec.describe "Vendor API Tests", type: :request do
     it "retrieves a list of vendors for a market" do
       market = create(:market)
       vendor_1 = create(:vendor)
+      #need method to custom validate false boolean which evaluates as nil
+      require 'pry'; binding.pry
       vendor_2 = create(:vendor)
       market_vendor1 = create(:market_vendor, market_id: market.id, vendor_id: vendor_1.id)
       market_vendor2 = create(:market_vendor, market_id: market.id, vendor_id: vendor_2.id)
@@ -94,6 +96,20 @@ RSpec.describe "Vendor API Tests", type: :request do
       credit_accepted: false
       }
       expect(response).to be_successful
+      vendor = JSON.parse(response.body, symbolize_names: true)[:data]
+      
+      expect(vendor).to have_key(:id)
+      expect(vendor[:id]).to be_a(String)
+    end
+
+    it "has error message for creating a vendor improperly" do
+      post "/api/v0/vendors", params: {
+      name: "Buzzy Bees",
+      description: "local honey and wax products",
+      credit_accepted: false
+      }
+      expect(response).to be_successful
+      require 'pry'; binding.pry
       vendor = JSON.parse(response.body, symbolize_names: true)[:data]
       
       expect(vendor).to have_key(:id)
