@@ -28,18 +28,19 @@ class Api::V0::VendorsController < ApplicationController
 
   def update
     vendor = Vendor.find(params[:id])
-    # begin
-    #   vendor.update(vendor_params)
-    #   render json: VendorSerializer.new(vendor)
-    # rescue ActiveRecord::RecordInvalid => e
-    #   error_messages = e.record.errors.full_messages.join(', ')
-    #   render json: { errors: [{ status: "400", detail: "Validation failed: #{error_messages}" }] }, status: :bad_request
     if vendor.update(vendor_params)
       render json: VendorSerializer.new(vendor)
     else
       error_messages = vendor.errors.full_messages.join(', ')
       render json: { errors: [{ status: "400", detail: "Validation failed: #{error_messages}" }] }, status: :bad_request
     end
+  end
+
+  def destroy
+    vendor = Vendor.find(params[:id])
+    vendor.destroy
+
+    head :no_content
   end
 
   private

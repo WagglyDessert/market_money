@@ -194,5 +194,36 @@ RSpec.describe "Vendor API Tests", type: :request do
       expect(error).to have_key(:errors)
       expect(error[:errors].first[:detail]).to be_a(String)
     end
+
+    it "deletes a vendor" do
+      post "/api/v0/vendors", params: {
+      name: "Buzzy Bees",
+      description: "local honey and wax products",
+      contact_name: "Berly Couwer",
+      contact_phone: "8389928383",
+      credit_accepted: false
+      }
+
+      vendor = JSON.parse(response.body, symbolize_names: true)[:data]
+      
+      delete "/api/v0/vendors/#{vendor[:id].to_i}"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(204)
+      expect(response.body).to eq("")
+    end
+
+    it "404 error when trying to delete a non-existent vendor" do
+      delete "/api/v0/vendors/1234"
+
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+
+      error = JSON.parse(response.body, symbolize_names: true)
+
+      expect(error[:errors]).to be_a(Array)
+      expect(error[:errors].first[:status]).to eq("404")
+      expect(error[:errors].first[:detail]).to eq("Couldn't find Vendor with 'id'=1234")
+    end
   end
 end
