@@ -17,10 +17,13 @@ class Api::V0::MarketVendorsController < ApplicationController
   end
 
   def destroy
-    # vendor = Vendor.find(params[:id])
-    # vendor.destroy
-
-    # head :no_content
+    market_vendor = MarketVendor.find_by(market_id: params[:market_id], vendor_id: params[:vendor_id])
+    if market_vendor
+      market_vendor.destroy
+      head :no_content
+    else
+      render json: { errors: [{ status: "404", detail: "No MarketVendor with market_id=#{params[:market_id].to_i} AND vendor_id=#{params[:vendor_id].to_i} exists" }] }, status: :not_found
+    end
   end
 
   private
@@ -35,7 +38,6 @@ class Api::V0::MarketVendorsController < ApplicationController
   end
 
   def market_vendor_rescue_options(market_vendor)
-    #require 'pry'; binding.pry
     if (Vendor.exists?(market_vendor.vendor_id) && Market.exists?(market_vendor.market_id)) == false
       if market_vendor.vendor_id == nil || market_vendor.market_id == nil
         error_messages = market_vendor.errors.full_messages.join(', ')

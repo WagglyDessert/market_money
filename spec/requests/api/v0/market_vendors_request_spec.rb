@@ -69,5 +69,45 @@ RSpec.describe "MarketVendor API Tests", type: :request do
       expect(error).to have_key(:errors)
       expect(error[:errors].first[:detail]).to be_a(String)
     end
+
+    it "deletes a marketvendor" do
+      market = create(:market)
+      vendor = create(:vendor)
+      post "/api/v0/market_vendors", params: {
+      market_id: "#{market.id}",
+      vendor_id: "#{vendor.id}",
+      }
+      expect(response).to be_successful
+      expect(response.status).to eq(201)
+      mv = JSON.parse(response.body, symbolize_names: true)[:market_vendor][:data]
+      delete "/api/v0/market_vendors", params: {
+        market_id: market.id,
+        vendor_id: vendor.id,
+      }
+
+      expect(response).to be_successful
+      expect(response.status).to eq(204)
+      expect(response.body).to eq("")
+    end
+
+    it "returns a 404 error if it cannot delete a marketvendor" do
+      market = create(:market)
+      vendor = create(:vendor)
+      post "/api/v0/market_vendors", params: {
+      market_id: "#{market.id}",
+      vendor_id: "#{vendor.id}",
+      }
+      expect(response).to be_successful
+      expect(response.status).to eq(201)
+      mv = JSON.parse(response.body, symbolize_names: true)[:market_vendor][:data]
+      delete "/api/v0/market_vendors", params: {
+        market_id: market.id,
+        vendor_id: 1234,
+      }
+      
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+      expect(response.body).to eq("{\"errors\":[{\"status\":\"404\",\"detail\":\"No MarketVendor with market_id=#{market.id} AND vendor_id=1234 exists\"}]}")
+    end
   end
 end
