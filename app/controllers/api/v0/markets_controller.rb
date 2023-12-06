@@ -15,10 +15,7 @@ class Api::V0::MarketsController < ApplicationController
     name = params[:name]
 
     validate_parameters(state, city, name)
-
-    markets = market_search(state, city, name)
-
-    render json: MarketSerializer.new(markets)
+    
   end
 
   private
@@ -39,6 +36,9 @@ class Api::V0::MarketsController < ApplicationController
 
     if invalid_combinations == true
       render json: { errors: [{ status: "422", detail: "Invalid set of parameters. Please provide a valid set of parameters to perform a search with this endpoint." }] }, status: :unprocessable_entity
+    else
+      markets = market_search(state, city, name)
+      render json: MarketSerializer.new(markets)
     end
   end
 
@@ -47,8 +47,8 @@ class Api::V0::MarketsController < ApplicationController
       markets = Market.where(state: state, city: city, name: name)
     elsif state.present? && city.present?
       markets = Market.where(state: state, city: city)
-    elsif city.present? && name.present?
-      markets = Market.where(name: name, city: city)
+    elsif state.present? && name.present?
+      markets = Market.where(name: name, state: state)
     elsif state.present?
       markets = Market.where(state: state)
     else
