@@ -84,5 +84,20 @@ RSpec.describe "Vendor API Tests", type: :request do
       expect(error[:errors].first[:status]).to eq("404")
       expect(error[:errors].first[:title]).to eq("Couldn't find Vendor with 'id'=1234")
     end
+
+    it "creates a vendor" do
+      post "/api/v0/vendors", params: {
+      name: "Buzzy Bees",
+      description: "local honey and wax products",
+      contact_name: "Berly Couwer",
+      contact_phone: "8389928383",
+      credit_accepted: false
+      }
+      expect(response).to be_successful
+      vendor = JSON.parse(response.body, symbolize_names: true)[:data]
+      
+      expect(vendor).to have_key(:id)
+      expect(vendor[:id]).to be_a(String)
+    end
   end
 end
