@@ -86,5 +86,40 @@ RSpec.describe "Market API Tests", type: :request do
       expect(error[:errors].first[:detail]).to eq("Couldn't find Market with 'id'=322458")
     end
 
+    it "retrieves a list of nearby atms" do
+      market = create(:market)
+      get "/api/v0/markets/#{market.id}/nearest_atms"
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+      atms = JSON.parse(response.body, symbolize_names: true)[:data]
+
+      expect(atms.first).to have_key(:id)
+      expect(atms.first[:id]).to eq(nil)
+      expect(atms.first).to have_key(:type)
+      expect(atms.first).to have_key(:attributes)
+      expect(atms.first[:attributes]).to have_key(:name)
+      expect(atms.first[:attributes]).to have_key(:address)
+      expect(atms.first[:attributes]).to have_key(:lat)
+      expect(atms.first[:attributes]).to have_key(:lon)
+      expect(atms.first[:attributes]).to have_key(:distance)
+
+      expect(atms.first[:attributes][:distance]).to be < (atms.second[:attributes][:distance])
+      expect(atms.index(atms.first)).to be < atms.index(atms.second)
+    end
+
+    it "returns status 404 if market id is incorrect" do
+      get "/api/v0/markets/1234/nearest_atms"
+
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+
+      error = JSON.parse(response.body, symbolize_names: true)
+
+      expect(error[:errors]).to be_a(Array)
+      expect(error[:errors].first[:status]).to eq("404")
+      expect(error[:errors].first[:detail]).to eq("Couldn't find Market with 'id'=1234")
+    end
+
   end
 end
