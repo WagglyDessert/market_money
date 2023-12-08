@@ -71,7 +71,7 @@ class Api::V0::MarketsController < ApplicationController
   end
 
   def tom_tom_url(lat, lon)
-    response = Faraday.get("https://api.tomtom.com/search/2/search/atms.json?key=juLrI2kuxm92R3pW9LzNHPoejWODYy8A&lat=#{lat}&lon=#{lon}")
+    response = Faraday.get("https://api.tomtom.com/search/2/search/atms.json?key=#{Rails.application.credentials.tomtom[:key]}&lat=#{lat}&lon=#{lon}")
 
     json = JSON.parse(response.body, symbolize_names: true)
 
